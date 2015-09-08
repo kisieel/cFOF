@@ -1,0 +1,16 @@
+--cpu Cortex-M3
+".\objects\startup_stm32l1xx_md.o"
+".\objects\system_stm32l1xx.o"
+".\objects\buzzer.o"
+".\objects\eeprom.o"
+".\objects\float.o"
+".\objects\key.o"
+".\objects\led.o"
+".\objects\menu.o"
+".\objects\rfm69w.o"
+".\objects\sys_tick.o"
+".\objects\usart.o"
+".\objects\main.o"
+--ro-base 0x08000000 --entry 0x08000000 --rw-base 0x20000000 --entry Reset_Handler --first __Vectors --strict --summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\Listings\cFOF.map" -o .\Objects\cFOF.axf
