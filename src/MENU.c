@@ -31,9 +31,13 @@ void menu_3_fun(unsigned int);
 void menu_4_fun(unsigned int);
 void menu_5_fun(unsigned int);
 
-void menu_par(MENU *);
+void MENU_par(MENU *);
 
-void menu_par(MENU *parent)
+void MENU_PacketInterpreter(void)
+{
+}
+
+void MENU_par(MENU *parent)
 {
 	_1_menu->par = parent;
 	_2_menu->par = parent;
@@ -62,42 +66,61 @@ void MENU_init()
 	_Syg_NONE_menu->menu_fun = menu_Syg_NONE_fun;
 	
 	_Syg_1_menu->next = _Syg_2_menu;
-	_Syg_1_menu->sub = _1_menu;
+	_Syg_1_menu->par = _Syg_1_menu;
+	_Syg_1_menu->sub = _1_menu; 
 	_Syg_1_menu->menu_fun = menu_Syg_1_fun;
+	_Syg_1_menu->LED_number = MENU_LED_SYG1;
 	
 	_Syg_2_menu->next = _Syg_3_menu;
+	_Syg_2_menu->par = _Syg_2_menu;
 	_Syg_2_menu->sub = _1_menu;
 	_Syg_2_menu->menu_fun = menu_Syg_2_fun;
+	_Syg_2_menu->LED_number = MENU_LED_SYG2;
 	
 	_Syg_3_menu->next = _Syg_4_menu;
+	_Syg_3_menu->par = _Syg_3_menu;
 	_Syg_3_menu->sub = _1_menu;
 	_Syg_3_menu->menu_fun = menu_Syg_3_fun;
+	_Syg_3_menu->LED_number = MENU_LED_SYG3;
 	
 	_Syg_4_menu->next = _Syg_NONE_menu;
+	_Syg_4_menu->par = _Syg_4_menu;
 	_Syg_4_menu->sub = _1_menu;
 	_Syg_4_menu->menu_fun = menu_Syg_4_fun;
+	_Syg_4_menu->LED_number = MENU_LED_SYG4;
 	
 	// 1 level
 	
 	_1_menu->next = _2_menu;
 	_1_menu->par = NULL;
 	_1_menu->menu_fun = menu_1_fun;
+	_1_menu->LED_number = MENU_LED_Menu;
+	_1_menu->LED_color = MENU_1_LED_Color;
 	
 	_2_menu->next = _3_menu;
 	_2_menu->par = NULL;
 	_2_menu->menu_fun = menu_2_fun;
+	_1_menu->LED_color = MENU_1_LED_Color;
+	_2_menu->LED_number = MENU_LED_Menu;
+	_2_menu->LED_color = MENU_2_LED_Color;
 	
 	_3_menu->next = _4_menu;
 	_3_menu->par = NULL;
 	_3_menu->menu_fun = menu_3_fun;
+	_3_menu->LED_number = MENU_LED_Menu;
+	_3_menu->LED_color = MENU_3_LED_Color;	
 	
 	_4_menu->next = _5_menu;
 	_4_menu->par = NULL;
 	_4_menu->menu_fun = menu_4_fun;
+	_4_menu->LED_number = MENU_LED_Menu;
+	_4_menu->LED_color = MENU_4_LED_Color;
 	
 	_5_menu->next = _1_menu;
 	_5_menu->par = NULL;
 	_5_menu->menu_fun = menu_5_fun;
+	_5_menu->LED_number = MENU_LED_Menu;
+	_5_menu->LED_color = MENU_5_LED_Color;
 	
 	_actual = _Syg_NONE_menu;
 }
@@ -105,16 +128,37 @@ void MENU_init()
 void menu_Syg_NONE_fun(unsigned int key)
 {
 	switch (key) {
+		case (KEY_3):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			switch (Syg_qnt) {
+				case 1:
+					_actual = _Syg_1_menu;
+					break;
+				case 2:
+					_actual = _Syg_2_menu;
+					break;
+				case 3:
+					_actual = _Syg_3_menu;
+					break;
+				case 4:
+					_actual = _Syg_4_menu;
+					break;
+			}
+			break;
 		case (KEY_2):
 			ClrKeyb( KBD_LOCK );
+			
 			break;
 		case (KEY_1):
+			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
+			
 			if (Syg_qnt > 0)
 				_actual = _actual->next;
 			else
 				_actual = _Syg_NONE_menu;
-			
 			break;
 	}
 }
@@ -124,20 +168,30 @@ void menu_Syg_1_fun(unsigned int key)
 	_LED_blink_on(MENU_LED_SYG1);
 	
 	switch (key) {
-		case (KEY_2):
+		case (KEY_3):
+			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
-			menu_par(_actual);
+			_LED_blink_off(_Syg_1_menu->LED_number);
+		
+			_actual = _Syg_NONE_menu;
+			break;
+		case (KEY_2):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			MENU_par(_actual);
+		
 			_actual = _actual->sub;
 			break;
 		case (KEY_1):
+			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
+			_LED_blink_off(_Syg_1_menu->LED_number);
+		
 			if (Syg_qnt > 1)
 				_actual = _actual->next;
 			else
 				_actual = _Syg_NONE_menu;
-			
-			_LED_blink_off(MENU_LED_SYG1);
-			
 			break;
 	}
 }
@@ -147,20 +201,30 @@ void menu_Syg_2_fun(unsigned int key)
 	_LED_blink_on(MENU_LED_SYG2);
 	
 	switch (key) {
-		case (KEY_2):
+		case (KEY_3):
 			ClrKeyb( KBD_LOCK );
-			menu_par(_actual);
+			_BUZZER_single_beep();
+			_LED_blink_off(_Syg_2_menu->LED_number);
+			
+			_actual = _Syg_1_menu;
+			break;
+		case (KEY_2):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			MENU_par(_actual);
+		
 			_actual = _actual->sub;
 			break;
 		case (KEY_1):
+			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
+			_LED_blink_off(_Syg_2_menu->LED_number);
+		
 			if (Syg_qnt > 2)
 				_actual = _actual->next;
 			else
 				_actual = _Syg_NONE_menu;
-			
-			_LED_blink_off(MENU_LED_SYG2);
-			
 			break;
 	}
 }
@@ -170,20 +234,31 @@ void menu_Syg_3_fun(unsigned int key)
 	_LED_blink_on(MENU_LED_SYG3);
 	
 	switch (key) {
-		case (KEY_2):
+		case (KEY_3):
+			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
-			menu_par(_actual);
+			_LED_blink_off(_Syg_3_menu->LED_number);
+		
+			_actual = _Syg_2_menu;
+			break;
+		case (KEY_2):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			MENU_par(_actual);
+		
 			_actual = _actual->sub;
 			break;
 		case (KEY_1):
+			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
+		
 			if (Syg_qnt > 3)
 				_actual = _actual->next;
 			else
 				_actual = _Syg_NONE_menu;
 			
-			_LED_blink_off(MENU_LED_SYG3);
-			
+			_LED_blink_off(_Syg_3_menu->LED_number);
 			break;
 	}
 }
@@ -193,23 +268,38 @@ void menu_Syg_4_fun(unsigned int key)
 	_LED_blink_on(MENU_LED_SYG4);
 	
 	switch (key) {
-		case (KEY_2):
+		case (KEY_3):
+			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
-			menu_par(_actual);
+			_LED_blink_off(_Syg_4_menu->LED_number);
+		
+			_actual = _Syg_3_menu;
+			break;
+		case (KEY_2):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			MENU_par(_actual);
+		
 			_actual = _actual->sub;
 			break;
 		case (KEY_1):
+			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
-			_actual = _actual->next;
-			
-			_LED_blink_off(MENU_LED_SYG4);
-			
+			_LED_blink_off(_Syg_4_menu->LED_number);
+		
+			_actual = _actual->next;			
 			break;
 	}
 }
 
+// Regulacja koloru diody
 void menu_1_fun(unsigned int key)
 {
+	uint8_t buffer_send[2];
+	
+	_LED_set_color_list(MENU_LED_Menu, MENU_1_LED_Color);
+	
 	if (_actual->par == _Syg_1_menu)
 		_LED_blink_on(MENU_LED_SYG1);
 	if (_actual->par == _Syg_2_menu)
@@ -220,31 +310,548 @@ void menu_1_fun(unsigned int key)
 		_LED_blink_on(MENU_LED_SYG4);
 	
 	switch (key) {
-		case (KEY_2):
+		case (KEY_3):
+			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
+		
+			if (_actual->par == _Syg_1_menu) {
+				if (System[0].ActColor == led_colors_qnt - 1)
+					System[0].ActColor = 0;
+				else
+					System[0].ActColor++;
+				_LED_set_color_list(MENU_LED_SYG1, System[0].ActColor);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				if (System[1].ActColor == led_colors_qnt - 1)
+					System[1].ActColor = 0;
+				else
+					System[1].ActColor++;
+				_LED_set_color_list(MENU_LED_SYG2, System[1].ActColor);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				if (System[2].ActColor == led_colors_qnt - 1)
+					System[2].ActColor = 0;
+				else
+					System[2].ActColor++;
+				_LED_set_color_list(MENU_LED_SYG3, System[2].ActColor);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				if (System[3].ActColor == led_colors_qnt - 1)
+					System[3].ActColor = 0;
+				else
+					System[3].ActColor++;
+				_LED_set_color_list(MENU_LED_SYG4, System[3].ActColor);
+			}
+		
+			break;
+		case (KEY_2):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			buffer_send[0] = MENU_RF_ActColor;
+			if (_actual->par == _Syg_1_menu) {
+				buffer_send[1] = System[0].ActColor;
+				RFM69W_sendWithRetry(System[0].ActAddress, buffer_send, 2, 15, 10);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				buffer_send[1] = System[1].ActColor;
+				RFM69W_sendWithRetry(System[1].ActAddress, buffer_send, 2, 15, 10);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				buffer_send[1] = System[2].ActColor;
+				RFM69W_sendWithRetry(System[2].ActAddress, buffer_send, 2, 15, 10);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				buffer_send[1] = System[3].ActColor;
+				RFM69W_sendWithRetry(System[3].ActAddress, buffer_send, 2, 15, 10);
+			}
+		
+			_actual = _actual->next;
 			break;
 		case (KEY_1):
+			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
+		
+			if (_actual->par == _Syg_1_menu) {
+				if (System[0].ActColor == 0)
+					System[0].ActColor = led_colors_qnt - 1;
+				else
+					System[0].ActColor--;
+				_LED_set_color_list(MENU_LED_SYG1, System[0].ActColor);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				if (System[1].ActColor == 0)
+					System[1].ActColor = led_colors_qnt - 1;
+				else
+					System[1].ActColor--;
+				_LED_set_color_list(MENU_LED_SYG2, System[1].ActColor);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				if (System[2].ActColor == 0)
+					System[2].ActColor = led_colors_qnt - 1;
+				else
+					System[2].ActColor--;
+				_LED_set_color_list(MENU_LED_SYG3, System[2].ActColor);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				if (System[3].ActColor == 0)
+					System[3].ActColor = led_colors_qnt - 1;
+				else
+					System[3].ActColor--;
+				_LED_set_color_list(MENU_LED_SYG4, System[3].ActColor);
+			}
+			
 			break;
 	}
 }
 
+// Wybor jasnosci diod
 void menu_2_fun(unsigned int key)
 {
+	uint8_t buffer_send[2];
 	
+	_LED_set_color_list(MENU_LED_Menu, MENU_2_LED_Color);
+	
+	if (_actual->par == _Syg_1_menu)
+		_LED_blink_on(MENU_LED_SYG1);
+	if (_actual->par == _Syg_2_menu)
+		_LED_blink_on(MENU_LED_SYG2);
+	if (_actual->par == _Syg_3_menu)
+		_LED_blink_on(MENU_LED_SYG3);
+	if (_actual->par == _Syg_4_menu)
+		_LED_blink_on(MENU_LED_SYG4);
+	
+	switch (key) {
+		case (KEY_3):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			if (_actual->par == _Syg_1_menu) {
+				if (System[0].ActBrightness == led_brightness_qnt - 1)
+					System[0].ActBrightness = 0;
+				else
+					System[0].ActBrightness++;
+				_LED_change_brightness_limit_list(System[0].ActBrightness);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				if (System[1].ActBrightness == led_brightness_qnt - 1)
+					System[1].ActBrightness = 0;
+				else
+					System[1].ActBrightness++;
+				_LED_change_brightness_limit_list(System[1].ActBrightness);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				if (System[2].ActBrightness == led_brightness_qnt - 1)
+					System[2].ActBrightness = 0;
+				else
+					System[2].ActBrightness++;
+				_LED_change_brightness_limit_list(System[2].ActBrightness);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				if (System[3].ActBrightness == led_brightness_qnt - 1)
+					System[3].ActBrightness = 0;
+				else
+					System[3].ActBrightness++;
+				_LED_change_brightness_limit_list(System[3].ActBrightness);
+			}
+		
+			break;
+		case (KEY_2):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			buffer_send[0] = MENU_RF_ActBrightness;
+			if (_actual->par == _Syg_1_menu) {
+				buffer_send[1] = System[0].ActBrightness;
+				RFM69W_sendWithRetry(System[0].ActAddress, buffer_send, 2, 15, 15);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				buffer_send[1] = System[1].ActBrightness;
+				RFM69W_sendWithRetry(System[1].ActAddress, buffer_send, 2, 15, 15);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				buffer_send[1] = System[2].ActBrightness;
+				RFM69W_sendWithRetry(System[2].ActAddress, buffer_send, 2, 15, 15);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				buffer_send[1] = System[3].ActBrightness;
+				RFM69W_sendWithRetry(System[3].ActAddress, buffer_send, 2, 15, 15);
+			}
+		
+			_actual = _actual->next;
+			break;
+		case (KEY_1):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			if (_actual->par == _Syg_1_menu) {
+				if (System[0].ActBrightness == 0)
+					System[0].ActBrightness = led_colors_qnt - 1;
+				else
+					System[0].ActBrightness--;
+				_LED_change_brightness_limit_list(System[0].ActBrightness);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				if (System[1].ActBrightness == 0)
+					System[1].ActBrightness = led_colors_qnt - 1;
+				else
+					System[1].ActBrightness--;
+				_LED_change_brightness_limit_list(System[1].ActBrightness);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				if (System[2].ActBrightness == 0)
+					System[2].ActBrightness = led_colors_qnt - 1;
+				else
+					System[2].ActBrightness--;
+				_LED_change_brightness_limit_list(System[2].ActBrightness);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				if (System[3].ActBrightness == 0)
+					System[3].ActBrightness = led_colors_qnt - 1;
+				else
+					System[3].ActBrightness--;
+				_LED_change_brightness_limit_list(System[3].ActBrightness);
+			}
+			
+			break;
+	}
 }
 
+// Wybor tonu alarmu
 void menu_3_fun(unsigned int key)
 {
+	uint8_t buffer_send[2];
 	
+	_LED_set_color_list(MENU_LED_Menu, MENU_3_LED_Color);
+	_BUZZER_alarm_start();
+	
+	if (_actual->par == _Syg_1_menu)
+		_LED_blink_on(MENU_LED_SYG1);
+	if (_actual->par == _Syg_2_menu)
+		_LED_blink_on(MENU_LED_SYG2);
+	if (_actual->par == _Syg_3_menu)
+		_LED_blink_on(MENU_LED_SYG3);
+	if (_actual->par == _Syg_4_menu)
+		_LED_blink_on(MENU_LED_SYG4);
+	
+	switch (key) {
+		case (KEY_3):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			if (_actual->par == _Syg_1_menu) {
+				if (System[0].ActAlarmTone == buzzer_tones_qnt - 1)
+					System[0].ActAlarmTone = 0;
+				else
+					System[0].ActAlarmTone++;
+				_BUZZER_alarm_set_tone_list(System[0].ActAlarmTone);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				if (System[1].ActAlarmTone == buzzer_tones_qnt - 1)
+					System[1].ActAlarmTone = 0;
+				else
+					System[1].ActAlarmTone++;
+				_BUZZER_alarm_set_tone_list(System[1].ActAlarmTone);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				if (System[2].ActAlarmTone == buzzer_tones_qnt - 1)
+					System[2].ActAlarmTone = 0;
+				else
+					System[2].ActAlarmTone++;
+				_BUZZER_alarm_set_tone_list(System[2].ActAlarmTone);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				if (System[3].ActAlarmTone == buzzer_tones_qnt - 1)
+					System[3].ActAlarmTone = 0;
+				else
+					System[3].ActAlarmTone++;
+				_BUZZER_alarm_set_tone_list(System[3].ActAlarmTone);
+			}
+		
+			break;
+		case (KEY_2):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			buffer_send[0] = MENU_RF_ActAlarmTone;
+			if (_actual->par == _Syg_1_menu) {
+				buffer_send[1] = System[0].ActAlarmTone;
+				RFM69W_sendWithRetry(System[0].ActAddress, buffer_send, 2, 15, 15);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				buffer_send[1] = System[1].ActAlarmTone;
+				RFM69W_sendWithRetry(System[1].ActAddress, buffer_send, 2, 15, 15);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				buffer_send[1] = System[2].ActAlarmTone;
+				RFM69W_sendWithRetry(System[2].ActAddress, buffer_send, 2, 15, 15);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				buffer_send[1] = System[3].ActAlarmTone;
+				RFM69W_sendWithRetry(System[3].ActAddress, buffer_send, 2, 15, 15);
+			}
+		
+			_actual = _actual->next;
+			break;
+		case (KEY_1):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			if (_actual->par == _Syg_1_menu) {
+				if (System[0].ActAlarmTone == 0)
+					System[0].ActAlarmTone = buzzer_tones_qnt - 1;
+				else
+					System[0].ActAlarmTone--;
+				_BUZZER_alarm_set_tone_list(System[0].ActAlarmTone);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				if (System[1].ActAlarmTone == 0)
+					System[1].ActAlarmTone = buzzer_tones_qnt - 1;
+				else
+					System[1].ActAlarmTone--;
+				_BUZZER_alarm_set_tone_list(System[1].ActAlarmTone);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				if (System[2].ActAlarmTone == 0)
+					System[2].ActAlarmTone = buzzer_tones_qnt - 1;
+				else
+					System[2].ActAlarmTone--;
+				_BUZZER_alarm_set_tone_list(System[2].ActAlarmTone);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				if (System[3].ActAlarmTone == 0)
+					System[3].ActAlarmTone = buzzer_tones_qnt - 1;
+				else
+					System[3].ActAlarmTone--;
+				_BUZZER_alarm_set_tone_list(System[3].ActAlarmTone);
+			}
+			
+			break;
+	}
 }
 
+// Wybor glososci alarmu
 void menu_4_fun(unsigned int key)
 {
+	uint8_t buffer_send[2];
 	
+	_LED_set_color_list(MENU_LED_Menu, MENU_4_LED_Color);
+	_BUZZER_alarm_start();
+	
+	if (_actual->par == _Syg_1_menu)
+		_LED_blink_on(MENU_LED_SYG1);
+	if (_actual->par == _Syg_2_menu)
+		_LED_blink_on(MENU_LED_SYG2);
+	if (_actual->par == _Syg_3_menu)
+		_LED_blink_on(MENU_LED_SYG3);
+	if (_actual->par == _Syg_4_menu)
+		_LED_blink_on(MENU_LED_SYG4);
+	
+	switch (key) {
+		case (KEY_3):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			if (_actual->par == _Syg_1_menu) {
+				if (System[0].ActAlarmVol == buzzer_vols_qnt - 1)
+					System[0].ActAlarmVol = 0;
+				else
+					System[0].ActAlarmVol++;
+				_BUZZER_alarm_set_vol_list(System[0].ActAlarmVol);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				if (System[1].ActAlarmVol == buzzer_vols_qnt - 1)
+					System[1].ActAlarmVol = 0;
+				else
+					System[1].ActAlarmVol++;
+				_BUZZER_alarm_set_vol_list(System[1].ActAlarmVol);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				if (System[2].ActAlarmVol == buzzer_vols_qnt - 1)
+					System[2].ActAlarmVol = 0;
+				else
+					System[2].ActAlarmVol++;
+				_BUZZER_alarm_set_vol_list(System[2].ActAlarmVol);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				if (System[3].ActAlarmVol == buzzer_vols_qnt - 1)
+					System[3].ActAlarmVol = 0;
+				else
+					System[3].ActAlarmVol++;
+				_BUZZER_alarm_set_vol_list(System[3].ActAlarmVol);
+			}
+			
+			break;
+		case (KEY_2):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			buffer_send[0] = MENU_RF_ActAlarmVolume;
+			if (_actual->par == _Syg_1_menu) {
+				buffer_send[1] = System[0].ActAlarmVol;
+				RFM69W_sendWithRetry(System[0].ActAddress, buffer_send, 2, 15, 15);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				buffer_send[1] = System[1].ActAlarmVol;
+				RFM69W_sendWithRetry(System[1].ActAddress, buffer_send, 2, 15, 15);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				buffer_send[1] = System[2].ActAlarmVol;
+				RFM69W_sendWithRetry(System[2].ActAddress, buffer_send, 2, 15, 15);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				buffer_send[1] = System[3].ActAlarmVol;
+				RFM69W_sendWithRetry(System[3].ActAddress, buffer_send, 2, 15, 15);
+			}
+		
+			_actual = _actual->next;
+			break;
+		case (KEY_1):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			if (_actual->par == _Syg_1_menu) {
+				if (System[0].ActAlarmVol == 0)
+					System[0].ActAlarmVol = buzzer_vols_qnt - 1;
+				else
+					System[0].ActAlarmVol--;
+				_BUZZER_alarm_set_vol_list(System[0].ActAlarmVol);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				if (System[1].ActAlarmVol == 0)
+					System[1].ActAlarmVol = buzzer_vols_qnt - 1;
+				else
+					System[1].ActAlarmVol--;
+				_BUZZER_alarm_set_vol_list(System[1].ActAlarmVol);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				if (System[2].ActAlarmVol == 0)
+					System[2].ActAlarmVol = buzzer_vols_qnt - 1;
+				else
+					System[2].ActAlarmVol--;
+				_BUZZER_alarm_set_vol_list(System[2].ActAlarmVol);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				if (System[3].ActAlarmVol == 0)
+					System[3].ActAlarmVol = buzzer_vols_qnt - 1;
+				else
+					System[3].ActAlarmVol--;
+				_BUZZER_alarm_set_vol_list(System[3].ActAlarmVol);
+			}
+			
+			break;
+	}
 }
 
+// Wybor tempa alarmu
 void menu_5_fun(unsigned int key)
 {
+	uint8_t buffer_send[2];
 	
+	_LED_set_color_list(MENU_LED_Menu, MENU_5_LED_Color);
+	_BUZZER_alarm_start();
+	
+	if (_actual->par == _Syg_1_menu)
+		_LED_blink_on(MENU_LED_SYG1);
+	if (_actual->par == _Syg_2_menu)
+		_LED_blink_on(MENU_LED_SYG2);
+	if (_actual->par == _Syg_3_menu)
+		_LED_blink_on(MENU_LED_SYG3);
+	if (_actual->par == _Syg_4_menu)
+		_LED_blink_on(MENU_LED_SYG4);
+	
+	switch (key) {
+		case (KEY_3):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			if (_actual->par == _Syg_1_menu) {
+				if (System[0].ActAlarmTempo == buzzer_tempos_qnt - 1)
+					System[0].ActAlarmTempo = 0;
+				else
+					System[0].ActAlarmTempo++;
+				_BUZZER_alarm_set_tempo_list(System[0].ActAlarmTempo);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				if (System[1].ActAlarmTempo == buzzer_tempos_qnt - 1)
+					System[1].ActAlarmTempo = 0;
+				else
+					System[1].ActAlarmTempo++;
+				_BUZZER_alarm_set_tempo_list(System[1].ActAlarmTempo);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				if (System[2].ActAlarmTempo == buzzer_tempos_qnt - 1)
+					System[2].ActAlarmTempo = 0;
+				else
+					System[2].ActAlarmTempo++;
+				_BUZZER_alarm_set_tempo_list(System[2].ActAlarmTempo);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				if (System[3].ActAlarmTempo == buzzer_tempos_qnt - 1)
+					System[3].ActAlarmTempo = 0;
+				else
+					System[3].ActAlarmTempo++;
+				_BUZZER_alarm_set_tempo_list(System[3].ActAlarmTempo);
+			}
+			
+			break;
+		case (KEY_2):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			buffer_send[0] = MENU_RF_ActAlarmTempo;
+			if (_actual->par == _Syg_1_menu) {
+				buffer_send[1] = System[0].ActAlarmTempo;
+				RFM69W_sendWithRetry(System[0].ActAddress, buffer_send, 2, 15, 15);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				buffer_send[1] = System[1].ActAlarmTempo;
+				RFM69W_sendWithRetry(System[1].ActAddress, buffer_send, 2, 15, 15);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				buffer_send[1] = System[2].ActAlarmTempo;
+				RFM69W_sendWithRetry(System[2].ActAddress, buffer_send, 2, 15, 15);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				buffer_send[1] = System[3].ActAlarmTempo;
+				RFM69W_sendWithRetry(System[3].ActAddress, buffer_send, 2, 15, 15);
+			}
+		
+			_actual = _actual->next;
+			break;
+		case (KEY_1):
+			_BUZZER_single_beep();
+			ClrKeyb( KBD_LOCK );
+		
+			if (_actual->par == _Syg_1_menu) {
+				if (System[0].ActAlarmTempo == 0)
+					System[0].ActAlarmTempo = buzzer_tempos_qnt - 1;
+				else
+					System[0].ActAlarmTempo--;
+				_BUZZER_alarm_set_tempo_list(System[0].ActAlarmTempo);
+			}
+			if (_actual->par == _Syg_2_menu) {
+				if (System[1].ActAlarmTempo == 0)
+					System[1].ActAlarmTempo = buzzer_tempos_qnt - 1;
+				else
+					System[1].ActAlarmTempo--;
+				_BUZZER_alarm_set_tempo_list(System[1].ActAlarmTempo);
+			}
+			if (_actual->par == _Syg_3_menu) {
+				if (System[2].ActAlarmTempo == 0)
+					System[2].ActAlarmTempo = buzzer_tempos_qnt - 1;
+				else
+					System[2].ActAlarmTempo--;
+				_BUZZER_alarm_set_tempo_list(System[2].ActAlarmTempo);
+			}
+			if (_actual->par == _Syg_4_menu) {
+				if (System[3].ActAlarmTempo == 0)
+					System[3].ActAlarmTempo = buzzer_tempos_qnt - 1;
+				else
+					System[3].ActAlarmTempo--;
+				_BUZZER_alarm_set_tempo_list(System[3].ActAlarmTempo);
+			}
+			
+			break;
+	}
 }

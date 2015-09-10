@@ -27,22 +27,40 @@ Project File Date:  09/08/2015
 <h2>Output:</h2>
 *** Using Compiler 'V5.05 update 2 (build 169)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'cFOF'
-compiling main.c...
+compiling MENU.c...
 .\inc\SYS_TICK.h(7): warning:  #1-D: last line of file ends without a newline
   #endif
 .\inc\BUZZER.h(102): warning:  #1-D: last line of file ends without a newline
   void _BUZZER_init(void);
 .\inc\LED.h(103): warning:  #1-D: last line of file ends without a newline
   void wait_(uint32_t time);
-.\inc\main.h(46): warning:  #1-D: last line of file ends without a newline
+.\inc\main.h(50): warning:  #1-D: last line of file ends without a newline
   #endif
-src\main.c(68): warning:  #1-D: last line of file ends without a newline
+src\MENU.c(857): warning:  #1-D: last line of file ends without a newline
   }
-src\main.c: 5 warnings, 0 errors
+src\MENU.c: 5 warnings, 0 errors
+compiling RFM69W.c...
+.\inc\SYS_TICK.h(7): warning:  #1-D: last line of file ends without a newline
+  #endif
+.\inc\BUZZER.h(102): warning:  #1-D: last line of file ends without a newline
+  void _BUZZER_init(void);
+.\inc\LED.h(103): warning:  #1-D: last line of file ends without a newline
+  void wait_(uint32_t time);
+.\inc\main.h(50): warning:  #1-D: last line of file ends without a newline
+  #endif
+src\RFM69W.c(154): warning:  #177-D: variable "buf" was declared but never referenced
+        uint8_t buf[10];
+src\RFM69W.c(155): warning:  #177-D: variable "i" was declared but never referenced
+        uint32_t i;
+src\RFM69W.c(848): warning:  #940-D: missing return statement at end of non-void function "RFM69W_SPI_send_poll"
+  }
+src\RFM69W.c(932): warning:  #550-D: variable "buffer" was set but never used
+        uint16_t buffer;
+src\RFM69W.c: 8 warnings, 0 errors
 linking...
-Program Size: Code=12564 RO-data=364 RW-data=456 ZI-data=3288  
+Program Size: Code=17644 RO-data=364 RW-data=456 ZI-data=3320  
 FromELF: creating hex file...
-".\Objects\cFOF.axf" - 0 Error(s), 5 Warning(s).
+".\Objects\cFOF.axf" - 0 Error(s), 13 Warning(s).
 
 <h2>Collection of Component include folders:</h2>
   C:\Users\Maciek\Documents\cFOF\RTE

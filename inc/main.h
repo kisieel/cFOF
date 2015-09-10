@@ -28,8 +28,11 @@
 // Time to hold the key to turn off
 #define TurnOffTime             3000
 
-#define PowerOn                 GPIOA->BSRRL |= GPIO_BSRR_BS_0;
-#define PowerOff                GPIOA->ODR &= ~GPIO_ODR_ODR_0;
+// Time to hold the key to go up
+#define GoUpTime                1500
+
+#define PowerOn                 GPIOA->BSRRL |= GPIO_BSRR_BS_3;
+#define PowerOff                GPIOA->ODR &= ~GPIO_ODR_ODR_3;
 
 typedef struct {
 	uint8_t ActAnimation;
@@ -39,8 +42,9 @@ typedef struct {
 	uint8_t ActAlarmVol;
 	uint8_t ActAlarmTempo;
 	uint8_t ActMusic;
+	uint8_t ActAddress;
 } SystemType;
 
-
+extern volatile SystemType System[4];
 
 #endif
