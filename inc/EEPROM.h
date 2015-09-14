@@ -1,6 +1,11 @@
 #ifndef __EEPROM_H
 #define __EEPROM_H
 
+#define EEPROM_Syg1Address           0
+#define EEPROM_Syg2Address           4
+#define EEPROM_Syg3Address           8
+#define EEPROM_Syg4Address           12
+
 #define EEPROM_ConfAddress1          0
 #define EEPROM_ConfAddress2          4
 #define EEPROM_ConfAddress3          8
@@ -26,8 +31,13 @@
 #define EEPROM_1_ActMusic              0x0F000000
 #define EEPROM_1_ActMusicPosition      6*4
 
+#define EEPROM_1_ActAddress            0xF0000000
+#define EEPROM_1_ActAddressPosition    7*4
+
+extern uint8_t EEPROM_SygAddress[];
+
 // Public functions
-extern void     EEPROM_SystemBackup(void);
+extern void     EEPROM_SystemBackup(uint8_t syg);
 
 extern void     EEPROM_64_erase(uint32_t ADDRESS);
 extern void     EEPROM_32_erase(uint32_t ADDRESS);

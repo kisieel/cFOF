@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "main.h"
 
-uint8_t Syg_qnt = 4;
+uint8_t Syg_qnt = 0;
 
 MENU *_Syg_NONE_menu;
 MENU *_Syg_1_menu;
@@ -33,8 +33,92 @@ void menu_5_fun(unsigned int);
 
 void MENU_par(MENU *);
 
+void MENU_SystemFill(uint8_t syg)
+{
+	uint32_t buffer;
+	
+	System[syg].ActAddress    = RFM69W_Data.SenderID;
+	System[syg].ActAnimation  = (0x0F & RFM69W_Data.Data[1]) >> 0;
+	System[syg].ActColor      = (0xF0 & RFM69W_Data.Data[1]) >> 4;
+	System[syg].ActAlarmTone  = (0x0F & RFM69W_Data.Data[2]) >> 0;
+	System[syg].ActAlarmVol   = (0xF0 & RFM69W_Data.Data[2]) >> 4;
+	System[syg].ActAlarmTempo = (0x0F & RFM69W_Data.Data[3]) >> 0;
+	System[syg].ActBrightness = (0xF0 & RFM69W_Data.Data[3]) >> 4;
+	System[syg].ActMusic      = (0x0F & RFM69W_Data.Data[4]) >> 0;
+	
+	EEPROM_SystemBackup(syg);
+}
+
+void MENU_SystemFillReset(uint8_t syg)
+{
+	uint32_t buffer;
+	
+	System[syg].ActAddress    = 0;
+	System[syg].ActAnimation  = 0;
+	System[syg].ActColor      = 0;
+	System[syg].ActAlarmTone  = 0;
+	System[syg].ActAlarmVol   = 0;
+	System[syg].ActAlarmTempo = 0;
+	System[syg].ActBrightness = 0;
+	System[syg].ActMusic      = 0;
+	
+	EEPROM_SystemBackup(syg);
+}
+
 void MENU_PacketInterpreter(void)
 {
+	switch (RFM69W_Data.Data[0]) {
+		case (MENU_RF_Recruit):
+			// Check if there are no maximum ammount of sygnallers
+			if (Syg_qnt < 4) {
+				// Check if there is no already this address in database
+				// TO JEST SLISKIE W HUJ BO CO JAK WYLACZE I WLACZE PO CHAMSKU? ODSWIEZANIE?
+				if (!((RFM69W_Data.SenderID == System[0].ActAddress) || 
+					    (RFM69W_Data.SenderID == System[1].ActAddress) || 
+				      (RFM69W_Data.SenderID == System[2].ActAddress) || 
+				      (RFM69W_Data.SenderID == System[3].ActAddress))) {
+					MENU_SystemFill(Syg_qnt);
+					_LED_set_color_list(MENU_LED_SYG1, System[Syg_qnt].ActColor);
+					_LED_on();
+					Syg_qnt++;
+				}
+			}
+			break;
+		case (MENU_RF_HallAlarm):
+			_BUZZER_alarm_start();
+			if (RFM69W_Data.SenderID == System[0].ActAddress) {
+				
+			} else {
+				if (RFM69W_Data.SenderID == System[1].ActAddress) {
+					
+				} else {
+					if (RFM69W_Data.SenderID == System[2].ActAddress) {
+						
+					} else {
+						if (RFM69W_Data.SenderID == System[3].ActAddress) {
+							
+						}
+					}
+				}
+			}
+			break;
+		case (MENU_RF_SendInfo):
+			MENU_SystemFill(RFM69W_Data.SenderID - 1);
+			_LED_set_color_list(MENU_LED_SYG1, System[RFM69W_Data.SenderID - 1].ActColor);
+			_LED_on();
+			break;
+		case (MENU_RF_LogOff):
+			if ((RFM69W_Data.SenderID == System[0].ActAddress) || 
+				  (RFM69W_Data.SenderID == System[1].ActAddress) || 
+			    (RFM69W_Data.SenderID == System[2].ActAddress) || 
+			    (RFM69W_Data.SenderID == System[3].ActAddress)) {
+				_LED_set_color(MENU_LED_SYG1, 0, 0, 0);
+				_LED_on();
+				MENU_SystemFillReset(Syg_qnt-1);
+				Syg_qnt--;
+			}
+			break;
+	}
 }
 
 void MENU_par(MENU *parent)
@@ -133,17 +217,34 @@ void menu_Syg_NONE_fun(unsigned int key)
 			ClrKeyb( KBD_LOCK );
 		
 			switch (Syg_qnt) {
+				case 0:
+#ifdef USART_debug
+					USART_send("Central unit menu.\n");
+#endif
+				break;
 				case 1:
 					_actual = _Syg_1_menu;
+#ifdef USART_debug
+					USART_send("Sygnaller #1 menu.\n");
+#endif
 					break;
 				case 2:
 					_actual = _Syg_2_menu;
+#ifdef USART_debug
+					USART_send("Sygnaller #2 menu.\n");
+#endif
 					break;
 				case 3:
 					_actual = _Syg_3_menu;
+#ifdef USART_debug
+					USART_send("Sygnaller #3 menu.\n");
+#endif
 					break;
 				case 4:
 					_actual = _Syg_4_menu;
+#ifdef USART_debug
+					USART_send("Sygnaller #4 menu.\n");
+#endif
 					break;
 			}
 			break;
@@ -155,10 +256,17 @@ void menu_Syg_NONE_fun(unsigned int key)
 			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 			
-			if (Syg_qnt > 0)
+			if (Syg_qnt > 0) {
 				_actual = _actual->next;
-			else
+#ifdef USART_debug
+				USART_send("Sygnaller #1 menu.\n");
+#endif
+			} else {
 				_actual = _Syg_NONE_menu;
+#ifdef USART_debug
+				USART_send("Central unit menu.\n");
+#endif
+			}
 			break;
 	}
 }
@@ -173,6 +281,10 @@ void menu_Syg_1_fun(unsigned int key)
 			ClrKeyb( KBD_LOCK );
 			_LED_blink_off(_Syg_1_menu->LED_number);
 		
+#ifdef USART_debug
+			USART_send("Central unit menu.\n");
+#endif
+
 			_actual = _Syg_NONE_menu;
 			break;
 		case (KEY_2):
@@ -180,7 +292,11 @@ void menu_Syg_1_fun(unsigned int key)
 			ClrKeyb( KBD_LOCK );
 		
 			MENU_par(_actual);
-		
+
+#ifdef USART_debug
+			USART_send("-1- LED color setting mode.\n");
+#endif
+
 			_actual = _actual->sub;
 			break;
 		case (KEY_1):
@@ -188,10 +304,17 @@ void menu_Syg_1_fun(unsigned int key)
 			ClrKeyb( KBD_LOCK );
 			_LED_blink_off(_Syg_1_menu->LED_number);
 		
-			if (Syg_qnt > 1)
+			if (Syg_qnt > 1) {
 				_actual = _actual->next;
-			else
+#ifdef USART_debug
+				USART_send("Sygnaller #2 menu.\n");
+#endif
+			} else {
 				_actual = _Syg_NONE_menu;
+#ifdef USART_debug
+				USART_send("Central unit menu.\n");
+#endif
+			}
 			break;
 	}
 }
@@ -205,6 +328,10 @@ void menu_Syg_2_fun(unsigned int key)
 			ClrKeyb( KBD_LOCK );
 			_BUZZER_single_beep();
 			_LED_blink_off(_Syg_2_menu->LED_number);
+
+#ifdef USART_debug
+			USART_send("Sygnaller #1 menu.\n");
+#endif
 			
 			_actual = _Syg_1_menu;
 			break;
@@ -213,6 +340,10 @@ void menu_Syg_2_fun(unsigned int key)
 			ClrKeyb( KBD_LOCK );
 		
 			MENU_par(_actual);
+
+#ifdef USART_debug
+			USART_send("-1- LED color setting mode.\n");
+#endif
 		
 			_actual = _actual->sub;
 			break;
@@ -221,10 +352,17 @@ void menu_Syg_2_fun(unsigned int key)
 			ClrKeyb( KBD_LOCK );
 			_LED_blink_off(_Syg_2_menu->LED_number);
 		
-			if (Syg_qnt > 2)
+			if (Syg_qnt > 2) {
 				_actual = _actual->next;
-			else
+#ifdef USART_debug
+				USART_send("Sygnaller #3 menu.\n");
+#endif
+			} else {
 				_actual = _Syg_NONE_menu;
+#ifdef USART_debug
+				USART_send("Central unit menu.\n");
+#endif
+			}
 			break;
 	}
 }
@@ -239,6 +377,10 @@ void menu_Syg_3_fun(unsigned int key)
 			ClrKeyb( KBD_LOCK );
 			_LED_blink_off(_Syg_3_menu->LED_number);
 		
+#ifdef USART_debug
+			USART_send("Sygnaller #2 menu.\n");
+#endif
+
 			_actual = _Syg_2_menu;
 			break;
 		case (KEY_2):
@@ -246,6 +388,10 @@ void menu_Syg_3_fun(unsigned int key)
 			ClrKeyb( KBD_LOCK );
 		
 			MENU_par(_actual);
+
+#ifdef USART_debug
+			USART_send("-1- LED color setting mode.\n");
+#endif
 		
 			_actual = _actual->sub;
 			break;
@@ -253,10 +399,17 @@ void menu_Syg_3_fun(unsigned int key)
 			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 		
-			if (Syg_qnt > 3)
+			if (Syg_qnt > 3) {
 				_actual = _actual->next;
-			else
+#ifdef USART_debug
+				USART_send("Sygnaller #4 menu.\n");
+#endif
+			} else {
 				_actual = _Syg_NONE_menu;
+#ifdef USART_debug
+				USART_send("Central unit menu.\n");
+#endif
+			}
 			
 			_LED_blink_off(_Syg_3_menu->LED_number);
 			break;
@@ -272,6 +425,10 @@ void menu_Syg_4_fun(unsigned int key)
 			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 			_LED_blink_off(_Syg_4_menu->LED_number);
+
+#ifdef USART_debug
+			USART_send("Sygnaller #3 menu.\n");
+#endif
 		
 			_actual = _Syg_3_menu;
 			break;
@@ -280,6 +437,10 @@ void menu_Syg_4_fun(unsigned int key)
 			ClrKeyb( KBD_LOCK );
 		
 			MENU_par(_actual);
+
+#ifdef USART_debug
+			USART_send("-1- LED color setting mode.\n");
+#endif
 		
 			_actual = _actual->sub;
 			break;
@@ -287,7 +448,11 @@ void menu_Syg_4_fun(unsigned int key)
 			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 			_LED_blink_off(_Syg_4_menu->LED_number);
-		
+
+#ifdef USART_debug
+			USART_send("Central unit menu.\n");
+#endif
+
 			_actual = _actual->next;			
 			break;
 	}
@@ -320,6 +485,12 @@ void menu_1_fun(unsigned int key)
 				else
 					System[0].ActColor++;
 				_LED_set_color_list(MENU_LED_SYG1, System[0].ActColor);
+
+#ifdef USART_debug
+				USART_send("\tLED color #");
+				USART_write_buf(System[0].ActColor, DEC);
+				USART_send(" for #1 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_2_menu) {
 				if (System[1].ActColor == led_colors_qnt - 1)
@@ -327,6 +498,12 @@ void menu_1_fun(unsigned int key)
 				else
 					System[1].ActColor++;
 				_LED_set_color_list(MENU_LED_SYG2, System[1].ActColor);
+
+#ifdef USART_debug
+				USART_send("\tLED color #");
+				USART_write_buf(System[1].ActColor, DEC);
+				USART_send(" for #2 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_3_menu) {
 				if (System[2].ActColor == led_colors_qnt - 1)
@@ -334,6 +511,12 @@ void menu_1_fun(unsigned int key)
 				else
 					System[2].ActColor++;
 				_LED_set_color_list(MENU_LED_SYG3, System[2].ActColor);
+
+#ifdef USART_debug
+				USART_send("\tLED color #");
+				USART_write_buf(System[2].ActColor, DEC);
+				USART_send(" for #3 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_4_menu) {
 				if (System[3].ActColor == led_colors_qnt - 1)
@@ -341,6 +524,12 @@ void menu_1_fun(unsigned int key)
 				else
 					System[3].ActColor++;
 				_LED_set_color_list(MENU_LED_SYG4, System[3].ActColor);
+
+#ifdef USART_debug
+				USART_send("\tLED color #");
+				USART_write_buf(System[3].ActColor, DEC);
+				USART_send(" for #4 sygnaller.\n");
+#endif
 			}
 		
 			break;
@@ -366,6 +555,10 @@ void menu_1_fun(unsigned int key)
 				RFM69W_sendWithRetry(System[3].ActAddress, buffer_send, 2, 15, 10);
 			}
 		
+#ifdef USART_debug
+			USART_send("-2- LED brightness setting mode.\n");
+#endif
+
 			_actual = _actual->next;
 			break;
 		case (KEY_1):
@@ -378,6 +571,12 @@ void menu_1_fun(unsigned int key)
 				else
 					System[0].ActColor--;
 				_LED_set_color_list(MENU_LED_SYG1, System[0].ActColor);
+
+#ifdef USART_debug
+				USART_send("\tLED color #");
+				USART_write_buf(System[0].ActColor, DEC);
+				USART_send(" for #1 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_2_menu) {
 				if (System[1].ActColor == 0)
@@ -385,6 +584,12 @@ void menu_1_fun(unsigned int key)
 				else
 					System[1].ActColor--;
 				_LED_set_color_list(MENU_LED_SYG2, System[1].ActColor);
+
+#ifdef USART_debug
+				USART_send("\tLED color #");
+				USART_write_buf(System[1].ActColor, DEC);
+				USART_send(" for #2 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_3_menu) {
 				if (System[2].ActColor == 0)
@@ -392,6 +597,12 @@ void menu_1_fun(unsigned int key)
 				else
 					System[2].ActColor--;
 				_LED_set_color_list(MENU_LED_SYG3, System[2].ActColor);
+
+#ifdef USART_debug
+				USART_send("\tLED color #");
+				USART_write_buf(System[2].ActColor, DEC);
+				USART_send(" for #3 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_4_menu) {
 				if (System[3].ActColor == 0)
@@ -399,6 +610,12 @@ void menu_1_fun(unsigned int key)
 				else
 					System[3].ActColor--;
 				_LED_set_color_list(MENU_LED_SYG4, System[3].ActColor);
+
+#ifdef USART_debug
+				USART_send("\tLED color #");
+				USART_write_buf(System[3].ActColor, DEC);
+				USART_send(" for #4 sygnaller.\n");
+#endif
 			}
 			
 			break;
@@ -432,6 +649,12 @@ void menu_2_fun(unsigned int key)
 				else
 					System[0].ActBrightness++;
 				_LED_change_brightness_limit_list(System[0].ActBrightness);
+
+#ifdef USART_debug
+				USART_send("\tLED brightness #");
+				USART_write_buf(System[0].ActBrightness, DEC);
+				USART_send(" for #1 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_2_menu) {
 				if (System[1].ActBrightness == led_brightness_qnt - 1)
@@ -439,6 +662,12 @@ void menu_2_fun(unsigned int key)
 				else
 					System[1].ActBrightness++;
 				_LED_change_brightness_limit_list(System[1].ActBrightness);
+
+#ifdef USART_debug
+				USART_send("\tLED brightness #");
+				USART_write_buf(System[1].ActBrightness, DEC);
+				USART_send(" for #2 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_3_menu) {
 				if (System[2].ActBrightness == led_brightness_qnt - 1)
@@ -447,17 +676,28 @@ void menu_2_fun(unsigned int key)
 					System[2].ActBrightness++;
 				_LED_change_brightness_limit_list(System[2].ActBrightness);
 			}
+
+#ifdef USART_debug
+				USART_send("\tLED brightness #");
+				USART_write_buf(System[2].ActBrightness, DEC);
+				USART_send(" for #3 sygnaller.\n");
+#endif
 			if (_actual->par == _Syg_4_menu) {
 				if (System[3].ActBrightness == led_brightness_qnt - 1)
 					System[3].ActBrightness = 0;
 				else
 					System[3].ActBrightness++;
 				_LED_change_brightness_limit_list(System[3].ActBrightness);
+
+#ifdef USART_debug
+				USART_send("\tLED brightness #");
+				USART_write_buf(System[3].ActBrightness, DEC);
+				USART_send(" for #4 sygnaller.\n");
+#endif
 			}
 		
 			break;
 		case (KEY_2):
-			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 		
 			buffer_send[0] = MENU_RF_ActBrightness;
@@ -478,6 +718,10 @@ void menu_2_fun(unsigned int key)
 				RFM69W_sendWithRetry(System[3].ActAddress, buffer_send, 2, 15, 15);
 			}
 		
+#ifdef USART_debug
+			USART_send("-3- Alarm tone setting mode.\n");
+#endif
+
 			_actual = _actual->next;
 			break;
 		case (KEY_1):
@@ -490,6 +734,12 @@ void menu_2_fun(unsigned int key)
 				else
 					System[0].ActBrightness--;
 				_LED_change_brightness_limit_list(System[0].ActBrightness);
+
+#ifdef USART_debug
+				USART_send("\tLED brightness #");
+				USART_write_buf(System[0].ActBrightness, DEC);
+				USART_send(" for #1 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_2_menu) {
 				if (System[1].ActBrightness == 0)
@@ -497,6 +747,12 @@ void menu_2_fun(unsigned int key)
 				else
 					System[1].ActBrightness--;
 				_LED_change_brightness_limit_list(System[1].ActBrightness);
+
+#ifdef USART_debug
+				USART_send("\tLED brightness #");
+				USART_write_buf(System[1].ActBrightness, DEC);
+				USART_send(" for #2 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_3_menu) {
 				if (System[2].ActBrightness == 0)
@@ -504,6 +760,12 @@ void menu_2_fun(unsigned int key)
 				else
 					System[2].ActBrightness--;
 				_LED_change_brightness_limit_list(System[2].ActBrightness);
+
+#ifdef USART_debug
+				USART_send("\tLED brightness #");
+				USART_write_buf(System[2].ActBrightness, DEC);
+				USART_send(" for #3 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_4_menu) {
 				if (System[3].ActBrightness == 0)
@@ -511,6 +773,12 @@ void menu_2_fun(unsigned int key)
 				else
 					System[3].ActBrightness--;
 				_LED_change_brightness_limit_list(System[3].ActBrightness);
+
+#ifdef USART_debug
+				USART_send("\tLED brightness #");
+				USART_write_buf(System[3].ActBrightness, DEC);
+				USART_send(" for #4 sygnaller.\n");
+#endif
 			}
 			
 			break;
@@ -536,7 +804,6 @@ void menu_3_fun(unsigned int key)
 	
 	switch (key) {
 		case (KEY_3):
-			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 		
 			if (_actual->par == _Syg_1_menu) {
@@ -545,6 +812,12 @@ void menu_3_fun(unsigned int key)
 				else
 					System[0].ActAlarmTone++;
 				_BUZZER_alarm_set_tone_list(System[0].ActAlarmTone);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tone #");
+				USART_write_buf(System[0].ActAlarmTone, DEC);
+				USART_send(" for #1 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_2_menu) {
 				if (System[1].ActAlarmTone == buzzer_tones_qnt - 1)
@@ -552,6 +825,12 @@ void menu_3_fun(unsigned int key)
 				else
 					System[1].ActAlarmTone++;
 				_BUZZER_alarm_set_tone_list(System[1].ActAlarmTone);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tone #");
+				USART_write_buf(System[1].ActAlarmTone, DEC);
+				USART_send(" for #2 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_3_menu) {
 				if (System[2].ActAlarmTone == buzzer_tones_qnt - 1)
@@ -559,6 +838,12 @@ void menu_3_fun(unsigned int key)
 				else
 					System[2].ActAlarmTone++;
 				_BUZZER_alarm_set_tone_list(System[2].ActAlarmTone);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tone #");
+				USART_write_buf(System[2].ActAlarmTone, DEC);
+				USART_send(" for #3 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_4_menu) {
 				if (System[3].ActAlarmTone == buzzer_tones_qnt - 1)
@@ -566,11 +851,16 @@ void menu_3_fun(unsigned int key)
 				else
 					System[3].ActAlarmTone++;
 				_BUZZER_alarm_set_tone_list(System[3].ActAlarmTone);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tone #");
+				USART_write_buf(System[3].ActAlarmTone, DEC);
+				USART_send(" for #4 sygnaller.\n");
+#endif
 			}
 		
 			break;
 		case (KEY_2):
-			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 		
 			buffer_send[0] = MENU_RF_ActAlarmTone;
@@ -590,11 +880,14 @@ void menu_3_fun(unsigned int key)
 				buffer_send[1] = System[3].ActAlarmTone;
 				RFM69W_sendWithRetry(System[3].ActAddress, buffer_send, 2, 15, 15);
 			}
+
+#ifdef USART_debug
+			USART_send("-4- Alarm volume setting mode.\n");
+#endif
 		
 			_actual = _actual->next;
 			break;
 		case (KEY_1):
-			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 		
 			if (_actual->par == _Syg_1_menu) {
@@ -603,6 +896,12 @@ void menu_3_fun(unsigned int key)
 				else
 					System[0].ActAlarmTone--;
 				_BUZZER_alarm_set_tone_list(System[0].ActAlarmTone);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tone #");
+				USART_write_buf(System[0].ActAlarmTone, DEC);
+				USART_send(" for #1 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_2_menu) {
 				if (System[1].ActAlarmTone == 0)
@@ -610,6 +909,12 @@ void menu_3_fun(unsigned int key)
 				else
 					System[1].ActAlarmTone--;
 				_BUZZER_alarm_set_tone_list(System[1].ActAlarmTone);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tone #");
+				USART_write_buf(System[1].ActAlarmTone, DEC);
+				USART_send(" for #2 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_3_menu) {
 				if (System[2].ActAlarmTone == 0)
@@ -617,6 +922,12 @@ void menu_3_fun(unsigned int key)
 				else
 					System[2].ActAlarmTone--;
 				_BUZZER_alarm_set_tone_list(System[2].ActAlarmTone);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tone #");
+				USART_write_buf(System[2].ActAlarmTone, DEC);
+				USART_send(" for #3 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_4_menu) {
 				if (System[3].ActAlarmTone == 0)
@@ -624,6 +935,12 @@ void menu_3_fun(unsigned int key)
 				else
 					System[3].ActAlarmTone--;
 				_BUZZER_alarm_set_tone_list(System[3].ActAlarmTone);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tone #");
+				USART_write_buf(System[3].ActAlarmTone, DEC);
+				USART_send(" for #4 sygnaller.\n");
+#endif
 			}
 			
 			break;
@@ -649,7 +966,6 @@ void menu_4_fun(unsigned int key)
 	
 	switch (key) {
 		case (KEY_3):
-			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 		
 			if (_actual->par == _Syg_1_menu) {
@@ -658,6 +974,12 @@ void menu_4_fun(unsigned int key)
 				else
 					System[0].ActAlarmVol++;
 				_BUZZER_alarm_set_vol_list(System[0].ActAlarmVol);
+
+#ifdef USART_debug
+				USART_send("\tAlarm volume #");
+				USART_write_buf(System[0].ActAlarmVol, DEC);
+				USART_send(" for #1 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_2_menu) {
 				if (System[1].ActAlarmVol == buzzer_vols_qnt - 1)
@@ -665,6 +987,12 @@ void menu_4_fun(unsigned int key)
 				else
 					System[1].ActAlarmVol++;
 				_BUZZER_alarm_set_vol_list(System[1].ActAlarmVol);
+
+#ifdef USART_debug
+				USART_send("\tAlarm volume #");
+				USART_write_buf(System[1].ActAlarmVol, DEC);
+				USART_send(" for #2 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_3_menu) {
 				if (System[2].ActAlarmVol == buzzer_vols_qnt - 1)
@@ -672,6 +1000,12 @@ void menu_4_fun(unsigned int key)
 				else
 					System[2].ActAlarmVol++;
 				_BUZZER_alarm_set_vol_list(System[2].ActAlarmVol);
+
+#ifdef USART_debug
+				USART_send("\tAlarm volume #");
+				USART_write_buf(System[2].ActAlarmVol, DEC);
+				USART_send(" for #3 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_4_menu) {
 				if (System[3].ActAlarmVol == buzzer_vols_qnt - 1)
@@ -679,11 +1013,16 @@ void menu_4_fun(unsigned int key)
 				else
 					System[3].ActAlarmVol++;
 				_BUZZER_alarm_set_vol_list(System[3].ActAlarmVol);
+
+#ifdef USART_debug
+				USART_send("\tAlarm volume #");
+				USART_write_buf(System[3].ActAlarmVol, DEC);
+				USART_send(" for #4 sygnaller.\n");
+#endif
 			}
 			
 			break;
 		case (KEY_2):
-			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 		
 			buffer_send[0] = MENU_RF_ActAlarmVolume;
@@ -704,10 +1043,13 @@ void menu_4_fun(unsigned int key)
 				RFM69W_sendWithRetry(System[3].ActAddress, buffer_send, 2, 15, 15);
 			}
 		
+#ifdef USART_debug
+			USART_send("-5- Alarm tempo setting mode.\n");
+#endif
+
 			_actual = _actual->next;
 			break;
 		case (KEY_1):
-			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 		
 			if (_actual->par == _Syg_1_menu) {
@@ -716,6 +1058,12 @@ void menu_4_fun(unsigned int key)
 				else
 					System[0].ActAlarmVol--;
 				_BUZZER_alarm_set_vol_list(System[0].ActAlarmVol);
+
+#ifdef USART_debug
+				USART_send("\tAlarm volume #");
+				USART_write_buf(System[0].ActAlarmVol, DEC);
+				USART_send(" for #1 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_2_menu) {
 				if (System[1].ActAlarmVol == 0)
@@ -723,6 +1071,12 @@ void menu_4_fun(unsigned int key)
 				else
 					System[1].ActAlarmVol--;
 				_BUZZER_alarm_set_vol_list(System[1].ActAlarmVol);
+
+#ifdef USART_debug
+				USART_send("\tAlarm volume #");
+				USART_write_buf(System[1].ActAlarmVol, DEC);
+				USART_send(" for #2 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_3_menu) {
 				if (System[2].ActAlarmVol == 0)
@@ -730,6 +1084,12 @@ void menu_4_fun(unsigned int key)
 				else
 					System[2].ActAlarmVol--;
 				_BUZZER_alarm_set_vol_list(System[2].ActAlarmVol);
+
+#ifdef USART_debug
+				USART_send("\tAlarm volume #");
+				USART_write_buf(System[2].ActAlarmVol, DEC);
+				USART_send(" for #3 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_4_menu) {
 				if (System[3].ActAlarmVol == 0)
@@ -737,6 +1097,12 @@ void menu_4_fun(unsigned int key)
 				else
 					System[3].ActAlarmVol--;
 				_BUZZER_alarm_set_vol_list(System[3].ActAlarmVol);
+
+#ifdef USART_debug
+				USART_send("\tAlarm volume #");
+				USART_write_buf(System[3].ActAlarmVol, DEC);
+				USART_send(" for #4 sygnaller.\n");
+#endif
 			}
 			
 			break;
@@ -762,7 +1128,6 @@ void menu_5_fun(unsigned int key)
 	
 	switch (key) {
 		case (KEY_3):
-			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 		
 			if (_actual->par == _Syg_1_menu) {
@@ -771,6 +1136,12 @@ void menu_5_fun(unsigned int key)
 				else
 					System[0].ActAlarmTempo++;
 				_BUZZER_alarm_set_tempo_list(System[0].ActAlarmTempo);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tempo #");
+				USART_write_buf(System[0].ActAlarmTempo, DEC);
+				USART_send(" for #1 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_2_menu) {
 				if (System[1].ActAlarmTempo == buzzer_tempos_qnt - 1)
@@ -778,6 +1149,12 @@ void menu_5_fun(unsigned int key)
 				else
 					System[1].ActAlarmTempo++;
 				_BUZZER_alarm_set_tempo_list(System[1].ActAlarmTempo);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tempo #");
+				USART_write_buf(System[1].ActAlarmTempo, DEC);
+				USART_send(" for #2 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_3_menu) {
 				if (System[2].ActAlarmTempo == buzzer_tempos_qnt - 1)
@@ -785,6 +1162,12 @@ void menu_5_fun(unsigned int key)
 				else
 					System[2].ActAlarmTempo++;
 				_BUZZER_alarm_set_tempo_list(System[2].ActAlarmTempo);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tempo #");
+				USART_write_buf(System[2].ActAlarmTempo, DEC);
+				USART_send(" for #3 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_4_menu) {
 				if (System[3].ActAlarmTempo == buzzer_tempos_qnt - 1)
@@ -792,11 +1175,16 @@ void menu_5_fun(unsigned int key)
 				else
 					System[3].ActAlarmTempo++;
 				_BUZZER_alarm_set_tempo_list(System[3].ActAlarmTempo);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tempo #");
+				USART_write_buf(System[3].ActAlarmTempo, DEC);
+				USART_send(" for #4 sygnaller.\n");
+#endif
 			}
 			
 			break;
 		case (KEY_2):
-			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 		
 			buffer_send[0] = MENU_RF_ActAlarmTempo;
@@ -817,10 +1205,13 @@ void menu_5_fun(unsigned int key)
 				RFM69W_sendWithRetry(System[3].ActAddress, buffer_send, 2, 15, 15);
 			}
 		
+#ifdef USART_debug
+			USART_send("-1- LED color setting mode.\n");
+#endif
+
 			_actual = _actual->next;
 			break;
 		case (KEY_1):
-			_BUZZER_single_beep();
 			ClrKeyb( KBD_LOCK );
 		
 			if (_actual->par == _Syg_1_menu) {
@@ -829,6 +1220,12 @@ void menu_5_fun(unsigned int key)
 				else
 					System[0].ActAlarmTempo--;
 				_BUZZER_alarm_set_tempo_list(System[0].ActAlarmTempo);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tempo #");
+				USART_write_buf(System[0].ActAlarmTempo, DEC);
+				USART_send(" for #1 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_2_menu) {
 				if (System[1].ActAlarmTempo == 0)
@@ -836,6 +1233,12 @@ void menu_5_fun(unsigned int key)
 				else
 					System[1].ActAlarmTempo--;
 				_BUZZER_alarm_set_tempo_list(System[1].ActAlarmTempo);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tempo #");
+				USART_write_buf(System[1].ActAlarmTempo, DEC);
+				USART_send(" for #2 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_3_menu) {
 				if (System[2].ActAlarmTempo == 0)
@@ -843,6 +1246,12 @@ void menu_5_fun(unsigned int key)
 				else
 					System[2].ActAlarmTempo--;
 				_BUZZER_alarm_set_tempo_list(System[2].ActAlarmTempo);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tempo #");
+				USART_write_buf(System[2].ActAlarmTempo, DEC);
+				USART_send(" for #3 sygnaller.\n");
+#endif
 			}
 			if (_actual->par == _Syg_4_menu) {
 				if (System[3].ActAlarmTempo == 0)
@@ -850,6 +1259,12 @@ void menu_5_fun(unsigned int key)
 				else
 					System[3].ActAlarmTempo--;
 				_BUZZER_alarm_set_tempo_list(System[3].ActAlarmTempo);
+
+#ifdef USART_debug
+				USART_send("\tAlarm tempo #");
+				USART_write_buf(System[3].ActAlarmTempo, DEC);
+				USART_send(" for #4 sygnaller.\n");
+#endif
 			}
 			
 			break;

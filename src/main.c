@@ -13,8 +13,10 @@ int main()
 	
 	// Keep power supply
 	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;            // Clock for GPIOA
-	GPIO_config(0x0A, 3, GPIO_MODE_GP, GPIO_PULL_Floating, GPIO_TYPE_Pushpull, GPIO_SPEED_400k, 0);
-	PowerOn;
+	GPIO_config(0x0A, 3, GPIO_MODE_GP, GPIO_PULL_Floating, GPIO_TYPE_Pushpull, GPIO_SPEED_400k, 0);	
+	GPIO_config(0x0A, 7, GPIO_MODE_GP, GPIO_PULL_Floating, GPIO_TYPE_Pushpull, GPIO_SPEED_400k, 0);
+	Power3VOn;
+	Power5VOn;
 	
 	KEY_init();
 	MENU_init();
@@ -33,14 +35,6 @@ int main()
 	USART_send("External devices initialized.\n");
 #endif
 
-	_LED_change_brightness_limit_list(0);
-
-	_LED_set_color_list(MENU_LED_Menu, 0);
-	_LED_set_color_list(MENU_LED_SYG1, 1);
-	_LED_set_color_list(MENU_LED_SYG2, 2);
-	_LED_set_color_list(MENU_LED_SYG3, 3);
-	_LED_set_color_list(MENU_LED_SYG4, 4);
-	_LED_on();
 
 	// Block device while the power button is still pressed
 	while(GPIOA->IDR & GPIO_IDR_IDR_0);
@@ -88,12 +82,14 @@ int main()
 					_LED_blink_on(MENU_LED_SYG4);
 				
 				if (SYS_TICK_timeOut(1, data1) > TurnOffTime) {
-					EEPROM_SystemBackup();
 					_LED_off();
 #ifdef USART_debug
 					USART_send("Power off detected. System backed up. Switching off.\n");
 #endif
-					PowerOff;
+					Power3VOff;
+					Power5VOff;
+					// Preventing from further code execution
+					for (;;);
 				}
 			}
 		}

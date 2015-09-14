@@ -22,11 +22,57 @@ Dialog DLL:      TCM.DLL V1.14.5.0
  
 <h2>Project:</h2>
 C:\Users\Maciek\Documents\cFOF\cFOF.uvprojx
-Project File Date:  09/08/2015
+Project File Date:  09/10/2015
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.05 update 2 (build 169)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
-Build target 'cFOF'
+Rebuild target 'cFOF'
+assembling startup_stm32l1xx_md.s...
+compiling system_stm32l1xx.c...
+compiling BUZZER.c...
+.\inc\BUZZER.h(102): warning:  #1-D: last line of file ends without a newline
+  void _BUZZER_init(void);
+src\BUZZER.c: 1 warning, 0 errors
+compiling EEPROM.c...
+.\inc\SYS_TICK.h(7): warning:  #1-D: last line of file ends without a newline
+  #endif
+.\inc\BUZZER.h(102): warning:  #1-D: last line of file ends without a newline
+  void _BUZZER_init(void);
+.\inc\LED.h(103): warning:  #1-D: last line of file ends without a newline
+  void wait_(uint32_t time);
+.\inc\main.h(53): warning:  #1-D: last line of file ends without a newline
+  #endif
+src\EEPROM.c(276): warning:  #1-D: last line of file ends without a newline
+  }
+src\EEPROM.c: 5 warnings, 0 errors
+compiling FLOAT.c...
+compiling KEY.c...
+compiling LED.c...
+.\inc\led.h(103): warning:  #1-D: last line of file ends without a newline
+  void wait_(uint32_t time);
+src\LED.c(253): warning:  #177-D: variable "temp_state" was declared but never referenced
+        uint32_t temp_state =   0;
+src\LED.c(254): warning:  #177-D: variable "i" was declared but never referenced
+        uint8_t i = 0;
+src\LED.c(264): warning:  #177-D: variable "temp_state" was declared but never referenced
+        uint32_t temp_state =   0;
+src\LED.c(265): warning:  #177-D: variable "i" was declared but never referenced
+        uint8_t i = 0;
+src\LED.c(295): warning:  #177-D: variable "temp_state" was declared but never referenced
+        uint32_t temp_state =   0;
+src\LED.c(298): warning:  #177-D: variable "i" was declared but never referenced
+        uint8_t i = 0;
+src\LED.c(319): warning:  #177-D: variable "temp_state" was declared but never referenced
+        uint32_t temp_state =   0;
+src\LED.c(321): warning:  #177-D: variable "i" was declared but never referenced
+        uint8_t i = 0;
+src\LED.c(373): warning:  #177-D: variable "temp_state" was declared but never referenced
+        uint32_t temp_state =   0;
+src\LED.c(375): warning:  #177-D: variable "i" was declared but never referenced
+        uint8_t i = 0;
+src\LED.c(661): warning:  #1-D: last line of file ends without a newline
+  }
+src\LED.c: 12 warnings, 0 errors
 compiling MENU.c...
 .\inc\SYS_TICK.h(7): warning:  #1-D: last line of file ends without a newline
   #endif
@@ -34,11 +80,13 @@ compiling MENU.c...
   void _BUZZER_init(void);
 .\inc\LED.h(103): warning:  #1-D: last line of file ends without a newline
   void wait_(uint32_t time);
-.\inc\main.h(50): warning:  #1-D: last line of file ends without a newline
+.\inc\main.h(53): warning:  #1-D: last line of file ends without a newline
   #endif
-src\MENU.c(857): warning:  #1-D: last line of file ends without a newline
-  }
-src\MENU.c: 5 warnings, 0 errors
+src\MENU.c(38): warning:  #177-D: variable "buffer" was declared but never referenced
+        uint32_t buffer;
+src\MENU.c(54): warning:  #177-D: variable "buffer" was declared but never referenced
+        uint32_t buffer;
+src\MENU.c: 6 warnings, 0 errors
 compiling RFM69W.c...
 .\inc\SYS_TICK.h(7): warning:  #1-D: last line of file ends without a newline
   #endif
@@ -46,21 +94,57 @@ compiling RFM69W.c...
   void _BUZZER_init(void);
 .\inc\LED.h(103): warning:  #1-D: last line of file ends without a newline
   void wait_(uint32_t time);
-.\inc\main.h(50): warning:  #1-D: last line of file ends without a newline
+.\inc\main.h(53): warning:  #1-D: last line of file ends without a newline
   #endif
 src\RFM69W.c(154): warning:  #177-D: variable "buf" was declared but never referenced
         uint8_t buf[10];
 src\RFM69W.c(155): warning:  #177-D: variable "i" was declared but never referenced
         uint32_t i;
-src\RFM69W.c(848): warning:  #940-D: missing return statement at end of non-void function "RFM69W_SPI_send_poll"
+src\RFM69W.c(845): warning:  #940-D: missing return statement at end of non-void function "RFM69W_SPI_send_poll"
   }
-src\RFM69W.c(932): warning:  #550-D: variable "buffer" was set but never used
+src\RFM69W.c(929): warning:  #550-D: variable "buffer" was set but never used
         uint16_t buffer;
 src\RFM69W.c: 8 warnings, 0 errors
+compiling SYS_TICK.c...
+.\inc\SYS_TICK.h(7): warning:  #1-D: last line of file ends without a newline
+  #endif
+.\inc\BUZZER.h(102): warning:  #1-D: last line of file ends without a newline
+  void _BUZZER_init(void);
+.\inc\LED.h(103): warning:  #1-D: last line of file ends without a newline
+  void wait_(uint32_t time);
+.\inc\main.h(53): warning:  #1-D: last line of file ends without a newline
+  #endif
+src\SYS_TICK.c(40): warning:  #1-D: last line of file ends without a newline
+  }
+src\SYS_TICK.c(40): warning:  #940-D: missing return statement at end of non-void function "SYS_TICK_timeOut"
+  }
+src\SYS_TICK.c: 6 warnings, 0 errors
+compiling USART.c...
+src\USART.c(37): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *"
+                _dbl2stri(buf, DATA, 0);
+src\USART.c(38): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *"
+                USART_send(buf);
+src\USART.c(43): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *"
+                _dbl2stri(buf, _decimal_binary(DATA), 0);
+src\USART.c(44): warning:  #167-D: argument of type "uint8_t *" is incompatible with parameter of type "char *"
+                USART_send(buf);
+src\USART.c: 4 warnings, 0 errors
+compiling main.c...
+.\inc\SYS_TICK.h(7): warning:  #1-D: last line of file ends without a newline
+  #endif
+.\inc\BUZZER.h(102): warning:  #1-D: last line of file ends without a newline
+  void _BUZZER_init(void);
+.\inc\LED.h(103): warning:  #1-D: last line of file ends without a newline
+  void wait_(uint32_t time);
+.\inc\main.h(53): warning:  #1-D: last line of file ends without a newline
+  #endif
+src\main.c(97): warning:  #1-D: last line of file ends without a newline
+  }
+src\main.c: 5 warnings, 0 errors
 linking...
-Program Size: Code=17644 RO-data=364 RW-data=456 ZI-data=3320  
+Program Size: Code=20516 RO-data=364 RW-data=460 ZI-data=3316  
 FromELF: creating hex file...
-".\Objects\cFOF.axf" - 0 Error(s), 13 Warning(s).
+".\Objects\cFOF.axf" - 0 Error(s), 47 Warning(s).
 
 <h2>Collection of Component include folders:</h2>
   C:\Users\Maciek\Documents\cFOF\RTE
