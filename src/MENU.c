@@ -84,19 +84,24 @@ void MENU_PacketInterpreter(void)
 				}
 			}
 			break;
+		case (MENU_RF_HallAlarmStop):
+			_BUZZER_alarm_stop();
+			_actual = _Syg_NONE_menu;
+			break;
 		case (MENU_RF_HallAlarm):
 			_BUZZER_alarm_start();
 			if (RFM69W_Data.SenderID == System[0].ActAddress) {
-				
+				_actual = _Syg_1_menu;
+				_LED_set_color(MENU_LED_Menu, 0, 0, 0);
 			} else {
 				if (RFM69W_Data.SenderID == System[1].ActAddress) {
-					
+					_actual = _Syg_2_menu;
 				} else {
 					if (RFM69W_Data.SenderID == System[2].ActAddress) {
-						
+						_actual = _Syg_3_menu;
 					} else {
 						if (RFM69W_Data.SenderID == System[3].ActAddress) {
-							
+							_actual = _Syg_4_menu;
 						}
 					}
 				}
