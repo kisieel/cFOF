@@ -39,6 +39,10 @@ int main()
 	// Block device while the power button is still pressed
 	while(GPIOA->IDR & GPIO_IDR_IDR_0);
 
+	_BUZZER_alarm_set_vol_list(2);
+	_BUZZER_alarm_set_tone_list(2);
+	_BUZZER_alarm_set_tempo_list(2);
+
 	for(;;) {
 		_actual->menu_fun(GetKeys());
 		

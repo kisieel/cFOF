@@ -85,6 +85,7 @@ void MENU_PacketInterpreter(void)
 			}
 			break;
 		case (MENU_RF_HallAlarmStop):
+			_LED_blink_off(MENU_LED_SYG1);
 			_BUZZER_alarm_stop();
 			_actual = _Syg_NONE_menu;
 			break;
@@ -868,6 +869,8 @@ void menu_3_fun(unsigned int key)
 		case (KEY_2):
 			ClrKeyb( KBD_LOCK );
 		
+			_BUZZER_alarm_stop();
+		
 			buffer_send[0] = MENU_RF_ActAlarmTone;
 			if (_actual->par == _Syg_1_menu) {
 				buffer_send[1] = System[0].ActAlarmTone;
@@ -1030,6 +1033,8 @@ void menu_4_fun(unsigned int key)
 		case (KEY_2):
 			ClrKeyb( KBD_LOCK );
 		
+			_BUZZER_alarm_stop();
+		
 			buffer_send[0] = MENU_RF_ActAlarmVolume;
 			if (_actual->par == _Syg_1_menu) {
 				buffer_send[1] = System[0].ActAlarmVol;
@@ -1191,6 +1196,8 @@ void menu_5_fun(unsigned int key)
 			break;
 		case (KEY_2):
 			ClrKeyb( KBD_LOCK );
+		
+			_BUZZER_alarm_stop();
 		
 			buffer_send[0] = MENU_RF_ActAlarmTempo;
 			if (_actual->par == _Syg_1_menu) {
